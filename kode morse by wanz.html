@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kode Morse Pramuka By Wanz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --hijau: #2d5a1b;
+      --hijau-muda: #4a8c2a;
+      --coklat: #6b3a1f;
+      --coklat-muda: #9c5a2d;
+      --kuning: #f0c040;
+      --krem: #f5edd6;
+      --gelap: #1a2e0d;
+      --putih: #faf8f0;
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: var(--gelap);
+      background-image:
+        repeating-linear-gradient(
+          45deg,
+          rgba(45,90,27,0.08) 0px,
+          rgba(45,90,27,0.08) 2px,
+          transparent 2px,
+          transparent 12px
+        ),
+        radial-gradient(ellipse at top left, #1e3d0e 0%, #0d1a07 60%);
+      min-height: 100vh;
+      color: var(--krem);
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 20px;
+      border-bottom: 3px double var(--coklat-muda);
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    header::before, header::after {
+      content: '⚜';
+      font-size: 2rem;
+      color: var(--kuning);
+      position: absolute;
+      top: 30px;
+    }
+    header::before { left: 20px; }
+    header::after  { right: 20px; }
+
+    h1 {
+      font-family: 'Special Elite', serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--kuning);
+      text-shadow: 2px 2px 6px var(--shadow);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      color: var(--krem);
+      opacity: 0.75;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      letter-spacing: 2px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      font-family: 'Special Elite', serif;
+      background: transparent;
+      border: 2px solid var(--coklat-muda);
+      color: var(--krem);
+      padding: 10px 22px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      border-radius: 3px;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: var(--coklat);
+      border-color: var(--kuning);
+      color: var(--kuning);
+      box-shadow: 0 0 12px rgba(240,192,64,0.3);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* CARD */
+    .card {
+      background: rgba(45,90,27,0.12);
+      border: 1px solid var(--coklat-muda);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .card h2 {
+      font-family: 'Special Elite', serif;
+      color: var(--kuning);
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(240,192,64,0.3);
+      padding-bottom: 8px;
+    }
+
+    /* TABEL REFERENSI */
+    .morse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .morse-item {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(107,58,31,0.5);
+      border-radius: 4px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s;
+      cursor: default;
+    }
+
+    .morse-item:hover {
+      background: rgba(107,58,31,0.4);
+      border-color: var(--kuning);
+    }
+
+    .morse-char {
+      font-size: 1.3rem;
+      color: var(--kuning);
+      font-family: 'Special Elite', serif;
+    }
+
+    .morse-code {
+      font-size: 0.95rem;
+      color: var(--krem);
+      letter-spacing: 3px;
+    }
+
+    /* TEXTAREA & INPUT */
+    textarea, input[type="text"] {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--coklat-muda);
+      color: var(--krem);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      padding: 14px;
+      border-radius: 4px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--kuning);
+      box-shadow: 0 0 8px rgba(240,192,64,0.2);
+    }
+
+    textarea { min-height: 110px; }
+
+    /* OUTPUT BOX */
+    .output-box {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--hijau-muda);
+      border-radius: 4px;
+      padding: 14px;
+      min-height: 80px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      color: #a8e06a;
+      word-break: break-all;
+      letter-spacing: 2px;
+      white-space: pre-wrap;
+      margin-top: 14px;
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button.aksi {
+      font-family: 'Special Elite', serif;
+      background: var(--coklat);
+      border: 2px solid var(--coklat-muda);
+      color: var(--kuning);
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    button.aksi:hover {
+      background: var(--coklat-muda);
+      border-color: var(--kuning);
+      box-shadow: 0 0 10px rgba(240,192,64,0.3);
+    }
+
+    button.aksi.hijau {
+      background: var(--hijau);
+      border-color: var(--hijau-muda);
+    }
+    button.aksi.hijau:hover {
+      background: var(--hijau-muda);
+      border-color: var(--kuning);
+    }
+
+    /* PLAYBACK */
+    .morse-visual {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      min-height: 50px;
+      padding: 12px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--hijau-muda);
+      border-radius: 4px;
+      margin-top: 14px;
+    }
+
+    .symbol {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50px;
+      transition: background 0.1s;
+    }
+
+    .symbol.dit {
+      width: 12px; height: 12px;
+      background: #4a8c2a;
+      border-radius: 50%;
+    }
+
+    .symbol.dah {
+      width: 34px; height: 12px;
+      background: #4a8c2a;
+      border-radius: 6px;
+    }
+
+    .symbol.space-char { width: 20px; }
+    .symbol.space-word { width: 40px; }
+
+    .symbol.lit.dit, .symbol.lit.dah { background: var(--kuning); box-shadow: 0 0 10px var(--kuning); }
+
+    /* QUIZ */
+    .quiz-question {
+      font-size: 2rem;
+      color: var(--kuning);
+      text-align: center;
+      padding: 20px;
+      letter-spacing: 6px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .quiz-option {
+      font-family: 'Special Elite', serif;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid var(--coklat-muda);
+      color: var(--krem);
+      padding: 14px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .quiz-option:hover { border-color: var(--kuning); background: rgba(107,58,31,0.3); }
+    .quiz-option.benar { border-color: #6fcf4a; background: rgba(70,160,40,0.3); color: #6fcf4a; }
+    .quiz-option.salah { border-color: #e05050; background: rgba(200,50,50,0.2); color: #e05050; }
+
+    .quiz-status {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      min-height: 24px;
+    }
+
+    .skor {
+      text-align: center;
+      font-family: 'Special Elite', serif;
+      font-size: 1.1rem;
+      color: var(--kuning);
+      margin-bottom: 14px;
+      letter-spacing: 2px;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--coklat-muda);
+      opacity: 0.5;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .morse-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+      .quiz-options { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Kode Morse Pramuka</h1>
+  <div class="subtitle">— Sandi Rahasia Pramuka Indonesia —</div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="ganti('referensi')">📋 Referensi</button>
+  <button class="tab-btn" onclick="ganti('enkripsi')">✏️ Enkripsi</button>
+  <button class="tab-btn" onclick="ganti('dekripsi')">🔍 Dekripsi</button>
+  <button class="tab-btn" onclick="ganti('putar')">🔊 Putar</button>
+  <button class="tab-btn" onclick="ganti('kuis')">🏅 Kuis</button>
+</div>
+
+<!-- ======================== REFERENSI ======================== -->
+<div id="tab-referensi" class="tab-panel active">
+  <div class="card">
+    <h2>⚜ Tabel Huruf A–Z</h2>
+    <div class="morse-grid" id="grid-huruf"></div>
+  </div>
+  <div class="card">
+    <h2>⚜ Tabel Angka 0–9</h2>
+    <div class="morse-grid" id="grid-angka"></div>
+  </div>
+  <div class="card">
+    <h2>⚜ Cara Membaca</h2>
+    <p style="line-height:1.8; opacity:0.9;">
+      · &nbsp; = <strong>Dit</strong> (titik) — nada pendek<br>
+      — &nbsp; = <strong>Dah</strong> (garis) — nada panjang (3× dit)<br>
+      <em>Spasi</em> antar simbol = jeda antar huruf<br>
+      <em>/ atau spasi lebar</em> = jeda antar kata
+    </p>
+  </div>
+</div>
+
+<!-- ======================== ENKRIPSI ======================== -->
+<div id="tab-enkripsi" class="tab-panel">
+  <div class="card">
+    <h2>✏️ Teks → Kode Morse</h2>
+    <textarea id="input-teks" placeholder="Ketik teks di sini...&#10;Contoh: PRAMUKA INDONESIA"></textarea>
+    <div class="btn-row">
+      <button class="aksi hijau" onclick="enkripsi()">🔒 Enkripsi</button>
+      <button class="aksi" onclick="bersihkan('input-teks','output-enkripsi')">🗑 Bersihkan</button>
+      <button class="aksi" onclick="salin('output-enkripsi')">📋 Salin</button>
+    </div>
+    <div class="output-box" id="output-enkripsi">Hasil morse akan muncul di sini...</div>
+  </div>
+</div>
+
+<!-- ======================== DEKRIPSI ======================== -->
+<div id="tab-dekripsi" class="tab-panel">
+  <div class="card">
+    <h2>🔍 Kode Morse → Teks</h2>
+    <textarea id="input-morse" placeholder="Masukkan kode morse...&#10;Contoh: .--. .-. .- -- ..- -.- .-"></textarea>
+    <p style="font-size:0.78rem; opacity:0.6; margin-top:8px;">Gunakan spasi antar huruf, garis miring (/) antar kata</p>
+    <div class="btn-row">
+      <button class="aksi hijau" onclick="dekripsi()">🔓 Dekripsi</button>
+      <button class="aksi" onclick="bersihkan('input-morse','output-dekripsi')">🗑 Bersihkan</button>
+      <button class="aksi" onclick="salin('output-dekripsi')">📋 Salin</button>
+    </div>
+    <div class="output-box" id="output-dekripsi">Hasil teks akan muncul di sini...</div>
+  </div>
+</div>
+
+<!-- ======================== PUTAR ======================== -->
+<div id="tab-putar" class="tab-panel">
+  <div class="card">
+    <h2>🔊 Putar Bunyi Morse</h2>
+    <input type="text" id="input-putar" placeholder="Ketik teks untuk diputar... Contoh: SOS"/>
+    <div class="btn-row">
+      <button class="aksi hijau" onclick="putarMorse()">▶ Putar</button>
+      <button class="aksi" onclick="stopMorse()">⏹ Stop</button>
+    </div>
+    <div class="morse-visual" id="visual-morse">
+      <span style="opacity:0.4; font-size:0.85rem;">Visual morse akan tampil di sini...</span>
+    </div>
+    <p style="font-size:0.78rem; opacity:0.55; margin-top:10px;">🟢 Titik kecil = Dit &nbsp; | &nbsp; 🟩 Panjang = Dah</p>
+  </div>
+</div>
+
+<!-- ======================== KUIS ======================== -->
+<div id="tab-kuis" class="tab-panel">
+  <div class="card">
+    <h2>🏅 Uji Kemampuan Morse</h2>
+    <div class="skor" id="skor-tampil">Skor: 0 | Benar: 0 | Salah: 0</div>
+    <div class="quiz-question" id="soal-morse">Tekan mulai untuk bermain</div>
+    <div class="quiz-options" id="pilihan-quiz"></div>
+    <div class="quiz-status" id="status-quiz"></div>
+    <div class="btn-row" style="justify-content:center; margin-top:16px;">
+      <button class="aksi hijau" onclick="mulaiKuis()">▶ Mulai / Soal Baru</button>
+      <button class="aksi" onclick="resetKuis()">🔄 Reset Skor</button>
+    </div>
+  </div>
+</div>
+
+<footer>⚜ GERAKAN PRAMUKA INDONESIA ⚜ &nbsp;·&nbsp; Dasa Darma Pramuka</footer>
+
+<script>
+// ========== DATA MORSE ==========
+const MORSE = {
+  A:'.-', B:'-...', C:'-.-.', D:'-..', E:'.', F:'..-.', G:'--.', H:'....',
+  I:'..', J:'.---', K:'-.-', L:'.-..', M:'--', N:'-.', O:'---', P:'.--.',
+  Q:'--.-', R:'.-.', S:'...', T:'-', U:'..-', V:'...-', W:'.--', X:'-..-',
+  Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--','/':'-..-.','@':'.--.-.','&':'.-...'
+};
+
+const MORSE_INVERSE = {};
+for(const [k,v] of Object.entries(MORSE)) MORSE_INVERSE[v] = k;
+
+// ========== RENDER TABEL ==========
+function renderGrid(el, chars) {
+  el.innerHTML = chars.map(c => `
+    <div class="morse-item">
+      <span class="morse-char">${c}</span>
+      <span class="morse-code">${MORSE[c]}</span>
+    </div>`).join('');
+}
+
+const huruf = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const angka = '0123456789'.split('');
+renderGrid(document.getElementById('grid-huruf'), huruf);
+renderGrid(document.getElementById('grid-angka'), angka);
+
+// ========== TABS ==========
+function ganti(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const idx = ['referensi','enkripsi','dekripsi','putar','kuis'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+// ========== ENKRIPSI ==========
+function enkripsi() {
+  const teks = document.getElementById('input-teks').value.toUpperCase();
+  let hasil = '';
+  for(let i = 0; i < teks.length; i++) {
+    const c = teks[i];
+    if(c === ' ') { hasil += ' / '; }
+    else if(MORSE[c]) { hasil += MORSE[c] + ' '; }
+    else { hasil += '? '; }
+  }
+  document.getElementById('output-enkripsi').textContent = hasil.trim() || 'Tidak ada karakter yang dikenali.';
+}
+
+// ========== DEKRIPSI ==========
+function dekripsi() {
+  const raw = document.getElementById('input-morse').value.trim();
+  const kata = raw.split(/\s*\/\s*/);
+  const hasil = kata.map(k => {
+    return k.trim().split(/\s+/).map(kode => {
+      return MORSE_INVERSE[kode] || '?';
+    }).join('');
+  }).join(' ');
+  document.getElementById('output-dekripsi').textContent = hasil || 'Input tidak valid.';
+}
+
+// ========== UTILS ==========
+function bersihkan(inId, outId) {
+  document.getElementById(inId).value = '';
+  document.getElementById(outId).textContent = '';
+}
+
+function salin(outId) {
+  const txt = document.getElementById(outId).textContent;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt).then(() => alert('✅ Berhasil disalin!'));
+}
+
+// ========== AUDIO MORSE ==========
+let audioCtx = null;
+let stopFlag = false;
+let playTimeout = null;
+
+function getCtx() {
+  if(!audioCtx || audioCtx.state === 'closed') {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function stopMorse() {
+  stopFlag = true;
+  if(audioCtx) audioCtx.close().catch(()=>{});
+  audioCtx = null;
+}
+
+async function putarMorse() {
+  stopFlag = false;
+  const teks = document.getElementById('input-putar').value.toUpperCase();
+  if(!teks.trim()) return;
+
+  const symbols = [];
+  for(let i = 0; i < teks.length; i++) {
+    const c = teks[i];
+    if(c === ' ') { symbols.push('SPACE'); }
+    else if(MORSE[c]) {
+      for(const s of MORSE[c]) symbols.push(s === '.' ? 'DIT' : 'DAH');
+      symbols.push('CHARSPACE');
+    }
+  }
+
+  // Render visual
+  const vis = document.getElementById('visual-morse');
+  vis.innerHTML = '';
+  const elems = [];
+  for(const s of symbols) {
+    const el = document.createElement('span');
+    el.classList.add('symbol');
+    if(s === 'DIT')       el.classList.add('dit');
+    else if(s === 'DAH')  el.classList.add('dah');
+    else if(s === 'SPACE') el.classList.add('space-word');
+    else                  el.classList.add('space-char');
+    vis.appendChild(el);
+    elems.push({el, s});
+  }
+
+  const ctx = getCtx();
+  const unitMs = 100;
+  let now = ctx.currentTime;
+
+  for(let i = 0; i < elems.length; i++) {
+    const {el, s} = elems[i];
+    if(stopFlag) break;
+
+    if(s === 'DIT' || s === 'DAH') {
+      const dur = s === 'DIT' ? unitMs : unitMs * 3;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 600;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.6, now + 0.005);
+      gain.gain.linearRampToValueAtTime(0.6, now + dur/1000 - 0.005);
+      gain.gain.linearRampToValueAtTime(0, now + dur/1000);
+      osc.start(now); osc.stop(now + dur/1000);
+
+      // Lit up animation
+      const delay = (now - ctx.currentTime) * 1000;
+      setTimeout(() => el.classList.add('lit'), Math.max(0, delay));
+      setTimeout(() => el.classList.remove('lit'), Math.max(0, delay + dur));
+
+      now += dur/1000 + unitMs/1000;
+    } else if(s === 'CHARSPACE') {
+      now += (unitMs * 3) / 1000;
+    } else if(s === 'SPACE') {
+      now += (unitMs * 7) / 1000;
+    }
+  }
+}
+
+// ========== KUIS ==========
+let skor = 0, benar = 0, salah = 0;
+let kuisJawaban = '';
+
+function mulaiKuis() {
+  const semua = Object.keys(MORSE).filter(k => huruf.includes(k) || angka.includes(k));
+  const jawab = semua[Math.floor(Math.random() * semua.length)];
+  kuisJawaban = jawab;
+
+  document.getElementById('soal-morse').textContent = MORSE[jawab];
+  document.getElementById('status-quiz').textContent = '';
+
+  // 3 pengecoh + 1 benar
+  const salahOpt = semua.filter(k => k !== jawab).sort(() => Math.random()-0.5).slice(0,3);
+  const opts = [...salahOpt, jawab].sort(() => Math.random()-0.5);
+
+  const el = document.getElementById('pilihan-quiz');
+  el.innerHTML = opts.map(o =>
+    `<button class="quiz-option" onclick="jawabKuis('${o}')">${o}</button>`
+  ).join('');
+}
+
+function jawabKuis(jawab) {
+  const btns = document.querySelectorAll('.quiz-option');
+  btns.forEach(b => {
+    b.disabled = true;
+    if(b.textContent === kuisJawaban) b.classList.add('benar');
+  });
+
+  const status = document.getElementById('status-quiz');
+  if(jawab === kuisJawaban) {
+    skor += 10; benar++;
+    status.textContent = '✅ Benar! +10 poin';
+    status.style.color = '#6fcf4a';
+  } else {
+    salah++;
+    document.querySelectorAll('.quiz-option').forEach(b => {
+      if(b.textContent === jawab) b.classList.add('salah');
+    });
+    status.textContent = `❌ Salah! Jawaban: ${kuisJawaban}`;
+    status.style.color = '#e05050';
+  }
+
+  updateSkor();
+  setTimeout(mulaiKuis, 1400);
+}
+
+function updateSkor() {
+  document.getElementById('skor-tampil').textContent =
+    `Skor: ${skor} | Benar: ${benar} | Salah: ${salah}`;
+}
+
+function resetKuis() {
+  skor = 0; benar = 0; salah = 0;
+  updateSkor();
+  document.getElementById('soal-morse').textContent = 'Tekan mulai untuk bermain';
+  document.getElementById('pilihan-quiz').innerHTML = '';
+  document.getElementById('status-quiz').textContent = '';
+}
+</script>
+</body>
+</html>
